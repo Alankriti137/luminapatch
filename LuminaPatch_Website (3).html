@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LuminaPatch — Continuous Breast Cancer Monitoring</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap');
+  :root {
+    --red: #b85c3e;
+    --dark: #1c1c1e;
+    --cream: #f5f0ec;
+    --cream2: #ede7e1;
+    --white: #ffffff;
+    --gray: #666;
+    --light-border: #e0d9d1;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'Inter', sans-serif; background: var(--white); color: var(--dark); overflow-x: hidden; }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(28,28,30,0.96); backdrop-filter: blur(12px);
+    padding: 0 48px; height: 60px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .nav-logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 20px; color: var(--white); letter-spacing: -0.5px; }
+  .nav-logo span { color: var(--red); }
+  .nav-links { display: flex; gap: 28px; list-style: none; }
+  .nav-links a { font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.65); text-decoration: none; transition: color 0.2s; }
+  .nav-links a:hover { color: #fff; }
+
+  /* SECTIONS */
+  section { padding: 100px 80px; }
+  .section-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.18em; color: var(--red); margin-bottom: 16px; }
+  .section-title { font-family: 'Syne', sans-serif; font-weight: 800; font-size: clamp(28px, 4vw, 48px); color: var(--dark); line-height: 1.1; letter-spacing: -1px; margin-bottom: 20px; }
+  .section-body { font-size: 16px; color: var(--gray); line-height: 1.75; max-width: 640px; }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh; background: var(--dark);
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 120px 80px 80px; position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: ''; position: absolute; top: -200px; right: -200px;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(184,92,62,0.25) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  .hero-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.18em; color: var(--red); margin-bottom: 24px; }
+  .hero-title { font-family: 'Syne', sans-serif; font-weight: 800; font-size: clamp(40px, 6vw, 80px); color: var(--white); line-height: 1.05; letter-spacing: -2px; max-width: 800px; margin-bottom: 32px; }
+  .hero-title span { color: var(--red); }
+  .hero-sub { font-size: clamp(15px, 2vw, 18px); color: rgba(255,255,255,0.6); max-width: 560px; line-height: 1.7; margin-bottom: 48px; }
+  .hero-stats { display: flex; gap: 0; margin-top: 80px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 40px; flex-wrap: wrap; }
+  .hero-stat { flex: 1; min-width: 140px; padding-right: 40px; border-right: 1px solid rgba(255,255,255,0.1); margin-right: 40px; }
+  .hero-stat:last-child { border-right: none; padding-right: 0; margin-right: 0; }
+  .hs-num { font-family: 'Syne', sans-serif; font-weight: 800; font-size: clamp(28px, 4vw, 48px); color: var(--white); line-height: 1; margin-bottom: 6px; }
+  .hs-label { font-size: 11px; color: rgba(255,255,255,0.45); text-transform: uppercase; letter-spacing: 0.08em; line-height: 1.4; }
+
+  /* PROBLEM */
+  .problem-section { background: var(--cream); }
+  .problem-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; margin-top: 60px; align-items: start; }
+  .problem-card { background: var(--white); padding: 28px; border-left: 4px solid var(--red); margin-bottom: 20px; }
+  .pc-stat { font-family: 'Syne', sans-serif; font-size: 32px; font-weight: 800; color: var(--red); margin-bottom: 4px; }
+  .pc-title { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; color: var(--dark); margin-bottom: 8px; }
+  .pc-body { font-size: 13px; color: var(--gray); line-height: 1.6; }
+
+  /* STATUS QUO */
+  .statusquo-section { background: var(--dark); }
+  .statusquo-section .section-title { color: var(--white); }
+  .statusquo-section .section-body { color: rgba(255,255,255,0.6); }
+  .sq-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: rgba(255,255,255,0.08); margin-top: 60px; }
+  .sq-card { background: var(--dark); padding: 32px 28px; }
+  .sq-icon { font-size: 28px; margin-bottom: 14px; display: block; }
+  .sq-title { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; color: var(--white); margin-bottom: 8px; }
+  .sq-body { font-size: 13px; color: rgba(255,255,255,0.5); line-height: 1.6; }
+  .sq-tag { display: inline-block; margin-top: 10px; padding: 4px 10px; background: rgba(184,92,62,0.2); color: var(--red); font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; }
+
+  /* SOLUTION */
+  .solution-section { background: var(--white); }
+  .channels-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--light-border); margin-top: 60px; }
+  .channel-card { background: var(--white); padding: 32px 24px; border-top: 3px solid var(--red); }
+  .cc-icon { font-size: 28px; margin-bottom: 14px; display: block; }
+  .cc-name { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; color: var(--dark); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px; }
+  .cc-desc { font-size: 13px; color: var(--gray); line-height: 1.6; margin-bottom: 10px; }
+  .cc-source { font-size: 10px; color: #aaa; font-style: italic; }
+  .ai-banner { margin-top: 1px; background: var(--red); padding: 32px 40px; display: flex; align-items: center; justify-content: space-between; gap: 32px; flex-wrap: wrap; }
+  .ai-banner-title { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; color: #fff; }
+  .ai-banner-body { font-size: 13px; color: rgba(255,255,255,0.85); line-height: 1.6; max-width: 600px; }
+
+  /* HOW IT WORKS */
+  .how-section { background: var(--cream); }
+  .steps-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; margin-top: 60px; border: 1px solid var(--light-border); }
+  .step-card { padding: 36px 28px; border-right: 1px solid var(--light-border); }
+  .step-card:last-child { border-right: none; }
+  .step-number { font-family: 'Syne', sans-serif; font-size: 48px; font-weight: 800; color: var(--cream2); line-height: 1; margin-bottom: 16px; }
+  .step-name { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; color: var(--dark); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px; }
+  .step-desc { font-size: 13px; color: var(--gray); line-height: 1.65; }
+
+  /* WHO IT'S FOR */
+  .who-section { background: var(--white); }
+  .who-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 60px; }
+  .who-card { background: var(--cream); padding: 32px; border-top: 3px solid var(--red); }
+  .who-icon { font-size: 32px; margin-bottom: 16px; display: block; }
+  .who-title { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; color: var(--dark); margin-bottom: 10px; }
+  .who-body { font-size: 13px; color: var(--gray); line-height: 1.65; }
+  .who-stat { font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 800; color: var(--red); margin-top: 14px; }
+  .who-stat-label { font-size: 10px; color: #aaa; text-transform: uppercase; letter-spacing: 0.08em; }
+
+  /* TECHNICAL */
+  .tech-section { background: var(--dark); }
+  .tech-section .section-title { color: var(--white); }
+  .tech-section .section-body { color: rgba(255,255,255,0.6); }
+  .tech-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: rgba(255,255,255,0.08); margin-top: 60px; }
+  .tech-card { background: var(--dark); padding: 32px; }
+  .tech-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; color: var(--red); margin-bottom: 8px; }
+  .tech-title { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; color: var(--white); margin-bottom: 10px; }
+  .tech-body { font-size: 13px; color: rgba(255,255,255,0.55); line-height: 1.65; }
+  .tech-spec { display: flex; flex-direction: column; gap: 6px; margin-top: 14px; }
+  .tech-spec-item { display: flex; gap: 10px; font-size: 12px; color: rgba(255,255,255,0.4); }
+  .tech-spec-item::before { content: '—'; color: var(--red); flex-shrink: 0; }
+
+  /* VALIDATION */
+  .validation-section { background: var(--cream); }
+  .val-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; margin-top: 60px; }
+  .val-item { padding-bottom: 24px; border-bottom: 1px solid var(--light-border); margin-bottom: 24px; }
+  .val-item:last-child { border-bottom: none; margin-bottom: 0; }
+  .val-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em; color: var(--red); margin-bottom: 6px; }
+  .val-title { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; color: var(--dark); margin-bottom: 6px; }
+  .val-body { font-size: 13px; color: var(--gray); line-height: 1.6; }
+  .val-source { font-size: 10px; color: #aaa; font-style: italic; margin-top: 6px; }
+  .val-box { background: var(--dark); padding: 36px; }
+  .val-box .section-label { color: var(--red); }
+  .val-box-title { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; color: var(--white); margin-bottom: 28px; }
+  .val-stat { margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+  .val-stat:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+  .vs-num { font-family: 'Syne', sans-serif; font-size: 32px; font-weight: 800; color: var(--red); line-height: 1; margin-bottom: 4px; }
+  .vs-label { font-size: 12px; color: rgba(255,255,255,0.5); line-height: 1.5; }
+
+  /* ROADMAP */
+  .roadmap-section { background: var(--white); }
+  .roadmap { display: flex; flex-direction: column; gap: 0; margin-top: 60px; }
+  .roadmap-item { display: grid; grid-template-columns: 180px 1fr; gap: 40px; padding: 32px 0; border-bottom: 1px solid var(--light-border); align-items: start; }
+  .roadmap-item:last-child { border-bottom: none; }
+  .roadmap-phase { }
+  .rp-time { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 800; color: var(--red); margin-bottom: 4px; }
+  .rp-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: #aaa; }
+  .roadmap-content { }
+  .rc-title { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; color: var(--dark); margin-bottom: 10px; }
+  .rc-body { font-size: 13px; color: var(--gray); line-height: 1.65; max-width: 600px; }
+  .rc-tags { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+  .rc-tag { padding: 4px 12px; background: var(--cream); font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--dark); }
+
+  /* FAQ */
+  .faq-section { background: var(--cream); }
+  .faq-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 60px; }
+  .faq-item { background: var(--white); padding: 28px; }
+  .faq-q { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; color: var(--dark); margin-bottom: 10px; }
+  .faq-a { font-size: 13px; color: var(--gray); line-height: 1.65; }
+
+  /* ABOUT */
+  .about-section { background: var(--red); }
+  .about-section .section-label { color: rgba(255,255,255,0.55); }
+  .about-section .section-title { color: var(--white); }
+  .about-section .section-body { color: rgba(255,255,255,0.8); max-width: 700px; }
+  .values-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 60px; }
+  .value-card { background: rgba(255,255,255,0.12); padding: 28px; }
+  .value-title { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 8px; }
+  .value-body { font-size: 13px; color: rgba(255,255,255,0.75); line-height: 1.6; }
+
+  /* CONTACT */
+  .contact-section { background: var(--dark); }
+  .contact-section .section-title { color: var(--white); }
+  .contact-section .section-body { color: rgba(255,255,255,0.6); }
+  .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; margin-top: 60px; }
+  .contact-info { display: flex; flex-direction: column; gap: 24px; }
+  .ci-item { padding: 24px; background: rgba(255,255,255,0.05); border-left: 3px solid var(--red); }
+  .ci-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em; color: var(--red); margin-bottom: 6px; }
+  .ci-text { font-size: 14px; color: rgba(255,255,255,0.8); line-height: 1.5; }
+
+
+  /* FOOTER */
+  footer { background: #111; padding: 48px 80px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px; }
+  .footer-brand { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 22px; color: #fff; }
+  .footer-brand span { color: var(--red); }
+  .footer-tagline { font-size: 12px; color: rgba(255,255,255,0.4); margin-top: 4px; }
+  .footer-links { display: flex; gap: 24px; flex-wrap: wrap; }
+  .footer-links a { font-size: 12px; color: rgba(255,255,255,0.3); text-decoration: none; }
+  .footer-links a:hover { color: rgba(255,255,255,0.6); }
+
+  @media (max-width: 768px) {
+    nav { padding: 0 20px; }
+    section { padding: 60px 24px; }
+    .hero { padding: 100px 24px 60px; }
+    .hero-stats { flex-direction: column; gap: 20px; }
+    .hero-stat { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 20px; padding-right: 0; margin-right: 0; }
+    .problem-grid, .val-grid, .tech-grid, .contact-grid { grid-template-columns: 1fr; }
+    .who-grid, .values-grid, .faq-grid { grid-template-columns: 1fr; }
+    .channels-grid { grid-template-columns: 1fr 1fr; }
+    .steps-row { grid-template-columns: 1fr 1fr; }
+    .step-card:nth-child(2) { border-right: none; }
+    .sq-grid { grid-template-columns: 1fr; }
+    .roadmap-item { grid-template-columns: 1fr; gap: 10px; }
+    .ai-banner { flex-direction: column; }
+    footer { flex-direction: column; }
+
+  }
+
+  .hamburger {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+  }
+  .hamburger span {
+    display: block;
+    width: 24px;
+    height: 2px;
+    background: #fff;
+    transition: all 0.25s;
+  }
+  .hamburger.active span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  .hamburger.active span:nth-child(2) { opacity: 0; }
+  .hamburger.active span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+  @media (max-width: 768px) {
+    .hamburger { display: flex; }
+    .nav-links {
+      display: none;
+      position: fixed;
+      top: 60px; left: 0; right: 0;
+      background: rgba(28,28,30,0.98);
+      flex-direction: column;
+      padding: 16px 24px 24px;
+      gap: 0;
+      z-index: 99;
+    }
+    .nav-links.open { display: flex; }
+    .nav-links li { border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .nav-links a { display: block; padding: 14px 0; font-size: 15px; color: rgba(255,255,255,0.8) !important; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">Lumina<span>Patch</span></div>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="#problem" onclick="closeMenu()">Problem</a></li>
+    <li><a href="#solution" onclick="closeMenu()">Solution</a></li>
+    <li><a href="#how" onclick="closeMenu()">How It Works</a></li>
+    <li><a href="#technical" onclick="closeMenu()">Technical</a></li>
+    <li><a href="#roadmap" onclick="closeMenu()">Roadmap</a></li>
+    <li><a href="#about" onclick="closeMenu()">About</a></li>
+    <li><a href="#contact" onclick="closeMenu()">Contact</a></li>
+  </ul>
+  <button class="hamburger" id="hamburger" onclick="toggleMenu()" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+<script>
+  function toggleMenu() {
+    const nav = document.getElementById('navLinks');
+    const btn = document.getElementById('hamburger');
+    nav.classList.toggle('open');
+    btn.classList.toggle('active');
+  }
+  function closeMenu() {
+    document.getElementById('navLinks').classList.remove('open');
+    document.getElementById('hamburger').classList.remove('active');
+  }
+</script>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-label">Synthetic Biology · NIR Sensing · AI · Breast Cancer Monitoring</div>
+  <h1 class="hero-title">Continuous monitoring for every woman who <span>can't afford to wait.</span></h1>
+  <p class="hero-sub">LuminaPatch is a wearable patch that continuously monitors breast tissue using four independent sensing channels — detecting cancer-consistent signals weeks before any scan would find them.</p>
+  <div class="hero-stats">
+    <div class="hero-stat"><div class="hs-num">670K</div><div class="hs-label">Breast cancer deaths per year globally</div></div>
+    <div class="hero-stat"><div class="hs-num">99%</div><div class="hs-label">5-year survival if caught at Stage 1</div></div>
+    <div class="hero-stat"><div class="hs-num">2–4</div><div class="hs-label">Scans per year for highest-risk patients</div></div>
+    <div class="hero-stat"><div class="hs-num">$6B</div><div class="hs-label">Diagnostics market with zero wearable competition</div></div>
+  </div>
+</section>
+
+<!-- PROBLEM -->
+<section class="problem-section" id="problem">
+  <div class="section-label">The Problem</div>
+  <h2 class="section-title">Medicine watches episodically.<br>Cancer grows continuously.</h2>
+  <div class="problem-grid">
+    <div>
+      <p class="section-body">BRCA-positive patients and breast cancer survivors have no continuous monitoring between clinical appointments. All current surveillance is entirely episodic — a mammogram once a year, an MRI every 6 months at best.</p>
+      <br>
+      <p class="section-body">Between those appointments, breast tissue is completely unwatched. If a tumour begins forming the day after a clear MRI, it will not be detected for up to 6 months. During that window it can progress from Stage 1 to Stage 3 — and the difference in survival is catastrophic.</p>
+      <br>
+      <p class="section-body">A 2026 retrospective cohort study of 722 BRCA mutation carriers confirmed that even with intensive 6-monthly alternating MRI and mammography surveillance, interval cancers — tumours developing between scheduled scans — still occurred. The gap between appointments is a documented, measurable clinical vulnerability.</p>
+      <br>
+      <p class="section-body" style="font-size:11px;color:#aaa;font-style:italic;">Source: Evaluating high-risk breast cancer surveillance outcomes in BRCA mutation carriers. Breast Cancer, Springer Nature, February 2026.</p>
+    </div>
+    <div>
+      <div class="problem-card">
+        <div class="pc-stat">99% → 28%</div>
+        <div class="pc-title">The survival gap</div>
+        <div class="pc-body">Stage 1 breast cancer has a 99% 5-year survival rate. Stage 4 drops to 28%. The difference between those two outcomes is almost entirely about when the cancer is found — and finding it earlier depends entirely on how frequently tissue is watched.</div>
+      </div>
+      <div class="problem-card">
+        <div class="pc-stat">6 months</div>
+        <div class="pc-title">The blind spot</div>
+        <div class="pc-body">The maximum gap between scans for even the highest-risk patients. A tumour forming after a clear MRI goes completely undetected and untreated until the next appointment — by which time it may have progressed significantly.</div>
+      </div>
+      <div class="problem-card">
+        <div class="pc-stat">50%</div>
+        <div class="pc-title">Mammography failure in dense tissue</div>
+        <div class="pc-body">Mammography misses up to 50% of cancers in women with dense breast tissue — which affects approximately 40% of all women. These patients are told their mammogram may miss cancers but given no better alternative.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATUS QUO -->
+<section class="statusquo-section" id="statusquo">
+  <div class="section-label">Status Quo</div>
+  <h2 class="section-title" style="color:#fff;">What exists today — and why it's not enough.</h2>
+  <p class="section-body">Every current breast cancer monitoring tool shares the same fundamental limitation: it produces a snapshot at a single moment in time, then leaves the patient completely unmonitored until the next appointment.</p>
+  <div class="sq-grid">
+    <div class="sq-card">
+      <span class="sq-icon">📷</span>
+      <div class="sq-title">Mammography</div>
+      <div class="sq-body">The standard screening tool for most women. Uses X-ray imaging to detect tumour masses. Produces one data point per year. Misses 15–20% of cancers in average density tissue and up to 50% in dense breast tissue. Accumulates radiation with every scan.</div>
+      <div class="sq-tag">1 data point/year</div>
+    </div>
+    <div class="sq-card">
+      <span class="sq-icon">🧲</span>
+      <div class="sq-title">MRI</div>
+      <div class="sq-body">More sensitive than mammography. Reserved for highest-risk patients — BRCA carriers and those with prior breast cancer. Costs $1,000–$3,000 per scan. Requires intravenous contrast injection. Produces 2 data points per year at best. Still leaves 6-month blind spots.</div>
+      <div class="sq-tag">2 data points/year</div>
+    </div>
+    <div class="sq-card">
+      <span class="sq-icon">🖐️</span>
+      <div class="sq-title">Self-Examination</div>
+      <div class="sq-body">Detects lumps large enough to feel — typically Stage 2 or later, when the tumour has already grown to a detectable size. Has no molecular or vascular sensitivity to early-stage changes. Highly unreliable and operator-dependent.</div>
+      <div class="sq-tag">Detects Stage 2+</div>
+    </div>
+  </div>
+</section>
+
+<!-- SOLUTION -->
+<section class="solution-section" id="solution">
+  <div class="section-label">The Solution</div>
+  <h2 class="section-title">A wearable patch that watches your tissue every single day.</h2>
+  <p class="section-body">LuminaPatch uses four completely independent sensing channels simultaneously. A personalised AI model learns each patient's individual tissue signature — then monitors continuously for multi-channel shifts consistent with early tumour development. All four channels must agree before any alert is generated.</p>
+  <div class="channels-grid">
+    <div class="channel-card">
+      <span class="cc-icon">💡</span>
+      <div class="cc-name">NIR Spectroscopy</div>
+      <div class="cc-desc">Near-infrared light in the 700–900nm range penetrates breast tissue up to 8cm. The patch measures haemoglobin concentration and tissue scattering — detecting the early angiogenesis and stiffness changes that precede visible tumour formation by weeks. A 2025 study from Simon Fraser University and BC Cancer achieved 94.7% sensitivity and 84.2% specificity distinguishing healthy from malignant breast tissue.</div>
+      <div class="cc-source">Source: Pouriayevali et al., Sensors, MDPI, February 2025</div>
+    </div>
+    <div class="channel-card">
+      <span class="cc-icon">⚡</span>
+      <div class="cc-name">Bioimpedance</div>
+      <div class="cc-desc">A low-amplitude alternating current sweeps across multiple frequencies through the tissue. Cancerous cells disrupt normal tissue architecture in ways that shift the electrical impedance profile measurably and consistently. A 2018 IEEE-published device combined NIR and bioimpedance in a single wearable breast cancer detection unit — validating that BIS can differentiate healthy from cancerous breast tissue.</div>
+      <div class="cc-source">Source: IEEE Conference on Biomedical Engineering, 2018</div>
+    </div>
+    <div class="channel-card">
+      <span class="cc-icon">🌡️</span>
+      <div class="cc-name">Thermal Sensing</div>
+      <div class="cc-desc">Developing tumours have elevated metabolic activity and abnormal blood vessel networks — both of which cause local tissue temperature to run 0.5–2°C warmer than surrounding healthy tissue. A passive thermistor array with 0.1°C resolution detects asymmetric heat patterns continuously, requiring no power for the sensing element itself.</div>
+      <div class="cc-source">Source: Medical thermography research, multiple clinical studies</div>
+    </div>
+    <div class="channel-card">
+      <span class="cc-icon">🧬</span>
+      <div class="cc-name">Syn Bio Layer</div>
+      <div class="cc-desc">Engineered microorganisms in a biocompatible hydrogel detect cancer-associated volatile organic compounds secreted through the skin above early tumours. When VOC concentrations reach threshold levels, the organisms activate a reporter circuit producing a measurable electrochemical signal — adding a molecular biological detection channel that electronics alone cannot replicate.</div>
+      <div class="cc-source">Source: Based on tyrosinase wearable detection, ACS Nano, 2023</div>
+    </div>
+  </div>
+  <div class="ai-banner">
+    <div><div class="ai-banner-title">Personalised AI — not population averages.</div></div>
+    <div class="ai-banner-body">Every existing tool compares a patient to a population average. LuminaPatch compares each patient to herself — her own biological baseline established over two weeks of continuous monitoring. A change that is normal for one patient and abnormal for another only becomes distinguishable when you compare someone to herself, not to a statistical average built from millions of different people with different tissue densities, hormonal profiles, and genetics.</div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how-section" id="how">
+  <div class="section-label">How It Works</div>
+  <h2 class="section-title">Four steps. No clinic visit required.</h2>
+  <p class="section-body">LuminaPatch is designed to fit into a patient's life with minimal friction. Prescribed by an oncologist or genetic counsellor and worn like a plaster under clothing.</p>
+  <div class="steps-row">
+    <div class="step-card">
+      <div class="step-number">01</div>
+      <div class="step-name">Apply</div>
+      <div class="step-desc">The flexible patch is placed directly on the chest over the area of concern. No special adhesive, no medical procedure, no clinic visit. It rests against the skin through gentle flexible contact and connects to the patient's phone automatically via Bluetooth.</div>
+    </div>
+    <div class="step-card">
+      <div class="step-number">02</div>
+      <div class="step-name">Learn</div>
+      <div class="step-desc">Over the first two weeks, the patch learns the patient's personal tissue baseline across their normal daily patterns — menstrual cycle phase, hydration, exercise, sleep, and temperature. This personalisation step is what makes the system clinically meaningful and distinguishes it from every existing tool.</div>
+    </div>
+    <div class="step-card">
+      <div class="step-number">03</div>
+      <div class="step-name">Monitor</div>
+      <div class="step-desc">All four channels run continuously in the background. The patient goes about their life normally. The app logs data silently — the patient can check their personal data timeline at any time and add their own notes about symptoms, medications, or lifestyle events that provide context for the readings.</div>
+    </div>
+    <div class="step-card">
+      <div class="step-number">04</div>
+      <div class="step-name">Alert</div>
+      <div class="step-desc">When all four channels shift together in a cancer-consistent pattern for 72+ consecutive hours, the patient receives a calm, informative notification. They review their data, add context if they want, and choose whether to share a structured clinical report with their doctor. Nothing happens automatically without patient consent.</div>
+    </div>
+  </div>
+</section>
+
+<!-- WHO IT'S FOR -->
+<section class="who-section" id="who">
+  <div class="section-label">Who It's For</div>
+  <h2 class="section-title">Three groups with the clearest need.</h2>
+  <p class="section-body">LuminaPatch is designed for patients already in clinical surveillance systems who need continuous monitoring between appointments — not as a replacement for clinical care, but as a continuous complement to it.</p>
+  <div class="who-grid">
+    <div class="who-card">
+      <span class="who-icon">🧬</span>
+      <div class="who-title">BRCA+ Patients</div>
+      <div class="who-body">BRCA1 and BRCA2 carriers face up to 72% lifetime breast cancer risk. They receive MRI every 6 months and mammogram annually — but between appointments, nobody is watching. The patch fills that gap continuously and non-invasively, providing data every day instead of twice a year. They are already embedded in clinical systems and highly motivated to adopt better monitoring.</div>
+      <div class="who-stat">2M+</div>
+      <div class="who-stat-label">BRCA+ patients in North America</div>
+    </div>
+    <div class="who-card">
+      <span class="who-icon">💙</span>
+      <div class="who-title">Breast Cancer Survivors</div>
+      <div class="who-body">3.8 million breast cancer survivors in the US live with constant fear of recurrence. After treatment ends, annual mammography leaves 12-month blind spots. The patch provides continuous reassurance and catches recurrence the moment biological changes begin — not months later at the next scheduled scan. Fear of recurrence is one of the most prevalent psychological burdens in cancer survivorship research.</div>
+      <div class="who-stat">3.8M</div>
+      <div class="who-stat-label">Breast cancer survivors in the US</div>
+    </div>
+    <div class="who-card">
+      <span class="who-icon">🔍</span>
+      <div class="who-title">Dense Breast Tissue Patients</div>
+      <div class="who-body">Approximately 40% of women have dense breast tissue, where mammography misses up to 50% of cancers because both tumours and dense tissue appear white on the scan. These women are told their mammogram may miss cancers but given no better alternative. NIR spectroscopy measures biological tissue properties unaffected by radiographic density — directly addressing a systematic failure of current imaging.</div>
+      <div class="who-stat">40%</div>
+      <div class="who-stat-label">Of women have dense breast tissue</div>
+    </div>
+  </div>
+</section>
+
+<!-- TECHNICAL -->
+<section class="tech-section" id="technical">
+  <div class="section-label">Technical Depth</div>
+  <h2 class="section-title" style="color:#fff;">All components exist today.</h2>
+  <p class="section-body">LuminaPatch integrates four validated sensing modalities on a single flexible substrate. The technical gap between current capabilities and a fully functional device is under five years. Every component technology has been independently validated in peer-reviewed research.</p>
+  <div class="tech-grid">
+    <div class="tech-card">
+      <div class="tech-label">Physical Construction</div>
+      <div class="tech-title">Flexible PDMS substrate with serpentine interconnects</div>
+      <div class="tech-body">The patch is built on polydimethylsiloxane — a biocompatible, skin-conforming material used widely in wearable medical devices. Serpentine wiring architecture allows the substrate to bend without breaking circuit connections. The UNC ANIRP patch confirmed NIR sensors do not require ultraclose contact to function accurately, enabling comfortable continuous wear without adhesives.</div>
+      <div class="tech-spec">
+        <div class="tech-spec-item">Thickness: ~0.5–1mm flexible substrate</div>
+        <div class="tech-spec-item">No bio-adhesive required for skin contact</div>
+        <div class="tech-spec-item">Biocompatible materials throughout</div>
+      </div>
+    </div>
+    <div class="tech-card">
+      <div class="tech-label">NIR System</div>
+      <div class="tech-title">700–900nm multi-wavelength LED array</div>
+      <div class="tech-body">Multiple LED wavelengths optimised for differential absorption of haemoglobin and lipids. Photodetectors read returning scattered light at defined source-detector separations of 2–4cm, optimised for breast tissue penetration depth. A 2025 MRI-guided NIR system validated 3D breast tissue reconstruction using flexible optoelectronic strips with 2,304 source-detector positions.</div>
+      <div class="tech-spec">
+        <div class="tech-spec-item">Wavelengths: 700–900nm multi-wavelength</div>
+        <div class="tech-spec-item">Penetration depth: up to 8cm in breast tissue</div>
+        <div class="tech-spec-item">Sensitivity: 94.7% (SFU & BC Cancer, 2025)</div>
+      </div>
+    </div>
+    <div class="tech-card">
+      <div class="tech-label">Bioimpedance System</div>
+      <div class="tech-title">Multi-frequency AC sweep, tetrapolar configuration</div>
+      <div class="tech-body">Tetrapolar electrode configuration minimises contact impedance artefacts. Frequency sweep from 1kHz to 1MHz extracts Cole-Cole parameters — a validated mathematical model of tissue electrical behaviour that changes characteristically with malignancy. The AD5933 impedance analyser chip is commercially available, low-power, and compact.</div>
+      <div class="tech-spec">
+        <div class="tech-spec-item">Current: &lt;1mA — below sensation threshold</div>
+        <div class="tech-spec-item">Frequency sweep: 1kHz to 1MHz</div>
+        <div class="tech-spec-item">Chip: AD5933 or equivalent</div>
+      </div>
+    </div>
+    <div class="tech-card">
+      <div class="tech-label">AI Architecture</div>
+      <div class="tech-title">LSTM personalised baseline model on ESP32</div>
+      <div class="tech-body">Lightweight time-series anomaly detection running on-device. Compares today's readings to the patient's personal established baseline. Requires all four channels to simultaneously exceed their individual deviation thresholds for 72+ consecutive hours before generating an alert — minimising false positives without sacrificing sensitivity to genuine biological change.</div>
+      <div class="tech-spec">
+        <div class="tech-spec-item">Target: detect signal shifts ≥4 weeks before imaging</div>
+        <div class="tech-spec-item">Target: false positive rate below 5%</div>
+        <div class="tech-spec-item">Alert threshold: 72-hour sustained convergence</div>
+      </div>
+    </div>
+    <div class="tech-card">
+      <div class="tech-label">Power System</div>
+      <div class="tech-title">Piezoelectric harvesting from breathing</div>
+      <div class="tech-body">A thin-film piezoelectric generator converts mechanical energy from chest wall movement during breathing into electrical energy stored in a supercapacitor. Supplemented by a thin-film photovoltaic layer harvesting ambient light. Duty cycling — activating sensing circuits for a measurement window then returning to low-power sleep — extends operational life indefinitely under normal daily activity.</div>
+      <div class="tech-spec">
+        <div class="tech-spec-item">Primary: piezoelectric from chest wall movement</div>
+        <div class="tech-spec-item">Secondary: thin-film photovoltaic</div>
+        <div class="tech-spec-item">No charging or battery replacement required</div>
+      </div>
+    </div>
+    <div class="tech-card">
+      <div class="tech-label">Syn Bio Layer</div>
+      <div class="tech-title">Engineered microorganisms in biocompatible hydrogel</div>
+      <div class="tech-body">Chassis organism: E. coli Nissle 1917 or B. subtilis — both established as safe for skin-contact applications. Genetic circuit: VOC-responsive promoter linked to electrochemical reporter. Kill switch: engineered self-termination if environmental conditions exceed defined range. Hydrogel matrix: PEG or alginate-based, maintains organism viability and prevents environmental contamination.</div>
+      <div class="tech-spec">
+        <div class="tech-spec-item">Chassis: E. coli Nissle or B. subtilis</div>
+        <div class="tech-spec-item">Containment: engineered kill switch</div>
+        <div class="tech-spec-item">Matrix: PEG or alginate hydrogel</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- VALIDATION -->
+<section class="validation-section" id="validation">
+  <div class="section-label">Research Validation</div>
+  <h2 class="section-title">Built on peer-reviewed science.</h2>
+  <p class="section-body">Every core claim in LuminaPatch's design is supported by published, peer-reviewed research. The scientific foundation for each sensing modality has been independently validated.</p>
+  <div class="val-grid">
+    <div>
+      <div class="val-item">
+        <div class="val-label">NIR Breast Cancer Detection</div>
+        <div class="val-title">94.7% sensitivity in breast tissue</div>
+        <div class="val-body">A handheld NIR DOT probe from Simon Fraser University and BC Cancer distinguished healthy from malignant breast tissue with 94.7% sensitivity and 84.2% specificity using multi-wavelength LEDs and machine learning image reconstruction.</div>
+        <div class="val-source">Pouriayevali M. et al. Sensors, MDPI, February 2025. DOI: 10.3390/s25030983</div>
+      </div>
+      <div class="val-item">
+        <div class="val-label">NIR Angiogenesis Detection</div>
+        <div class="val-title">Haemoglobin signals confirm tumour angiogenesis</div>
+        <div class="val-body">NIR spectroscopy detects cancers in vivo through measurements of oxy- and deoxy-haemoglobin, providing signals of tumour angiogenesis and hypermetabolism — the earliest biological events in tumour development.</div>
+        <div class="val-source">NIR spectroscopic detection of breast cancer. PubMed, PMID: 16173821</div>
+      </div>
+      <div class="val-item">
+        <div class="val-label">Combined NIR + Bioimpedance</div>
+        <div class="val-title">Dual-modality wearable breast device validated</div>
+        <div class="val-body">A wearable device combining NIR spectroscopy and bioimpedance spectroscopy in a single unit successfully differentiated healthy from cancerous breast tissue based on optical and electrical properties simultaneously.</div>
+        <div class="val-source">IEEE Conference on Biomedical Engineering, 2018. DOI: 10.1109/ICBME.2018.8410543</div>
+      </div>
+      <div class="val-item">
+        <div class="val-label">BRCA Surveillance Gap</div>
+        <div class="val-title">Interval cancers confirmed in intensive surveillance</div>
+        <div class="val-body">A 2026 cohort study of 722 BRCA mutation carriers found that even with alternating 6-monthly MRI and mammography, interval cancers still occurred — confirming the surveillance gap is a documented clinical vulnerability.</div>
+        <div class="val-source">Breast Cancer, Springer Nature, February 2026. DOI: 10.1007/s12282-026-01822-x</div>
+      </div>
+    </div>
+    <div class="val-box">
+      <div class="section-label">Market Opportunity</div>
+      <div class="val-box-title">$6B market. Zero wearable competition.</div>
+      <div class="val-stat"><div class="vs-num">$6B → $11B</div><div class="vs-label">Breast cancer diagnostics market growing at 8.6% annually through 2033. Home monitoring is the fastest-growing segment.</div></div>
+      <div class="val-stat"><div class="vs-num">0</div><div class="vs-label">Continuous wearable breast cancer surveillance devices currently approved or commercially available anywhere in the world. Entirely white space.</div></div>
+      <div class="val-stat"><div class="vs-num">2M+</div><div class="vs-label">BRCA+ patients in North America alone — already in clinical systems, highly motivated, high willingness to pay.</div></div>
+      <div class="val-stat"><div class="vs-num">3.8M</div><div class="vs-label">Breast cancer survivors in the US — second major user group with annual mammography blind spots.</div></div>
+      <div class="val-stat"><div class="vs-num">&lt;5 yrs</div><div class="vs-label">Technical gap to a fully functional device. All component technologies exist and have been independently validated today.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ROADMAP -->
+<section class="roadmap-section" id="roadmap">
+  <div class="section-label">Roadmap</div>
+  <h2 class="section-title">From validation to clinical reality.</h2>
+  <p class="section-body">LuminaPatch follows a staged development pathway designed to prove the highest-risk scientific questions first, before committing to hardware development.</p>
+  <div class="roadmap">
+    <div class="roadmap-item">
+      <div class="roadmap-phase">
+        <div class="rp-time">Stage 1</div>
+        <div class="rp-label">Now — Year 1</div>
+      </div>
+      <div class="roadmap-content">
+        <div class="rc-title">AI Signal Validation Study</div>
+        <div class="rc-body">A 6-month prospective observational study enrolling 50–100 BRCA+ patients and breast cancer survivors. Participants wear research-grade combinations of existing validated sensors during standardised daily sessions. All sensor data is time-stamped alongside clinical imaging results. Goal: confirm multimodal signal shifts precede imaging findings by at least 4 weeks, with false positive rate below 5%.</div>
+        <div class="rc-tags"><span class="rc-tag">$1M Budget</span><span class="rc-tag">No Hardware Build</span><span class="rc-tag">Existing Sensors</span><span class="rc-tag">50–100 Patients</span></div>
+      </div>
+    </div>
+    <div class="roadmap-item">
+      <div class="roadmap-phase">
+        <div class="rp-time">Stage 2</div>
+        <div class="rp-label">Year 1–2</div>
+      </div>
+      <div class="roadmap-content">
+        <div class="rc-title">Integrated Patch Prototype</div>
+        <div class="rc-body">If Stage 1 validates the signal, design and build the first integrated patch combining all four sensing modalities on a flexible substrate. Bench testing on tissue phantoms. Optimise miniaturisation, power consumption, and form factor for comfortable daily wear. University lab partnership for fabrication.</div>
+        <div class="rc-tags"><span class="rc-tag">Hardware Build</span><span class="rc-tag">University Partnership</span><span class="rc-tag">Bench Testing</span></div>
+      </div>
+    </div>
+    <div class="roadmap-item">
+      <div class="roadmap-phase">
+        <div class="rp-time">Stage 3</div>
+        <div class="rp-label">Year 2–3</div>
+      </div>
+      <div class="roadmap-content">
+        <div class="rc-title">First Human Pilot</div>
+        <div class="rc-body">Small first-in-human safety and feasibility study. 20–30 high-risk participants wearing the integrated patch continuously for 3 months alongside standard clinical surveillance. Primary endpoint: safety and comfort. Secondary endpoint: signal quality and correlation with clinical findings.</div>
+        <div class="rc-tags"><span class="rc-tag">IRB Approval</span><span class="rc-tag">Safety Focus</span><span class="rc-tag">20–30 Participants</span></div>
+      </div>
+    </div>
+    <div class="roadmap-item">
+      <div class="roadmap-phase">
+        <div class="rp-time">Stage 4</div>
+        <div class="rp-label">Year 4–5</div>
+      </div>
+      <div class="roadmap-content">
+        <div class="rc-title">Efficacy Clinical Trial</div>
+        <div class="rc-body">Powered clinical trial demonstrating that LuminaPatch detects breast cancer recurrence or new tumour development earlier than standard-of-care imaging. This is the primary evidence base for FDA 510(k) submission as a Class II monitoring device.</div>
+        <div class="rc-tags"><span class="rc-tag">FDA Pathway</span><span class="rc-tag">Efficacy Data</span><span class="rc-tag">Powered Trial</span></div>
+      </div>
+    </div>
+    <div class="roadmap-item">
+      <div class="roadmap-phase">
+        <div class="rp-time">Stage 5</div>
+        <div class="rp-label">Year 6–7</div>
+      </div>
+      <div class="roadmap-content">
+        <div class="rc-title">FDA Clearance and Commercial Launch</div>
+        <div class="rc-body">FDA 510(k) clearance as a non-diagnostic continuous monitoring device. Initial commercial launch targeting BRCA+ patients through oncology and genetic counselling clinical pathways. Health Canada submission for Canadian market simultaneously. Reimbursement pathway through major insurers.</div>
+        <div class="rc-tags"><span class="rc-tag">FDA 510(k)</span><span class="rc-tag">Health Canada</span><span class="rc-tag">Commercial Launch</span><span class="rc-tag">Insurance Reimbursement</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="faq-section" id="faq">
+  <div class="section-label">FAQ</div>
+  <h2 class="section-title">Common questions.</h2>
+  <div class="faq-grid">
+    <div class="faq-item">
+      <div class="faq-q">Does the patch diagnose cancer?</div>
+      <div class="faq-a">No. LuminaPatch is a continuous monitoring device, not a diagnostic tool. It detects sustained changes in tissue signals that are consistent with early tumour development and alerts the patient to seek clinical evaluation sooner. All diagnosis happens through standard clinical pathways — imaging, biopsy, and pathology.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">How does it prevent false alarms?</div>
+      <div class="faq-a">The patch requires all four independent sensing channels to shift simultaneously in a cancer-consistent pattern for at least 72 consecutive hours before generating an alert. Each channel measures a completely different physical property of the tissue. Normal biological variation — menstrual cycle changes, hydration, exercise — almost never changes all four channels simultaneously. This convergence requirement is the primary false positive control mechanism.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Is the electrical current safe?</div>
+      <div class="faq-a">Yes. The bioimpedance measurement uses a current of less than 1 milliampere — well below the threshold for any sensation and thousands of times below any harmful level. TENS devices used in physiotherapy clinics use the same principle. The NIR light is non-ionising and produces no radiation exposure. The patch is designed for continuous daily wear indefinitely.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Who owns the data?</div>
+      <div class="faq-a">The patient owns their data entirely. The AI logs all sensor readings locally on the device and in the patient's app. No data is ever sent to a doctor without the patient actively choosing to generate and share a report. Patients can add their own notes, review their full timeline, and delete their data at any time.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Does it work for all breast cancer types?</div>
+      <div class="faq-a">The patch detects changes in the biological properties of breast tissue that are common across most breast cancer types — haemoglobin changes from angiogenesis, tissue stiffness from fibrosis, and temperature elevation from metabolic activity. These changes occur broadly across invasive breast cancers. Specific performance by cancer subtype will be characterised during the clinical validation study.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">What stage is LuminaPatch at?</div>
+      <div class="faq-a">LuminaPatch is at the early concept and validation design stage. The scientific foundations for each sensing modality have been validated independently in peer-reviewed research. The next step is a $1M observational study to confirm the multimodal signal exists in real patient data before building any integrated hardware. We are actively seeking research partners and early-stage investors.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section class="about-section" id="about">
+  <div class="section-label">About</div>
+  <h2 class="section-title">Built on a simple conviction.</h2>
+  <p class="section-body">LuminaPatch was founded on the belief that the gap between clinical appointments is one of the most preventable causes of late-stage breast cancer diagnoses — and that the technology to close that gap already exists. Four independently validated sensing modalities. A personalised AI model. A wearable form factor. Nobody has assembled them into a continuous breast cancer surveillance system. We are doing that.</p>
+  <div class="values-grid">
+    <div class="value-card">
+      <div class="value-title">Patient First</div>
+      <div class="value-body">The patient owns their data. The patient controls what their doctor receives and when. No automatic data transmission, no surveillance without consent. Every design decision centres patient trust and autonomy.</div>
+    </div>
+    <div class="value-card">
+      <div class="value-title">Scientifically Honest</div>
+      <div class="value-body">We name our kill conditions alongside our success criteria. We do not overclaim. Every technical assertion is backed by peer-reviewed research and cited explicitly. We know what we don't yet know — and our validation study is designed to find out.</div>
+    </div>
+    <div class="value-card">
+      <div class="value-title">Equity-Driven</div>
+      <div class="value-body">We build for the patients most failed by current surveillance — women with dense breast tissue whose mammograms miss half their cancers, underserved populations with limited MRI access, and anyone who has fallen through the gaps of episodic care.</div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section class="contact-section" id="contact">
+  <div class="section-label">Contact</div>
+  <h2 class="section-title" style="color:#fff;">Partner with us.</h2>
+  <p class="section-body">We are seeking research partners, clinical collaborators, and early-stage investors who share our conviction that continuous breast cancer monitoring is both technically achievable and clinically necessary.</p>
+  <div class="contact-grid">
+    <div class="contact-info">
+      <div class="ci-item">
+        <div class="ci-label">Research Partnership</div>
+        <div class="ci-text">We are looking for academic partners in biomedical engineering, oncology, and clinical research to co-design and run the Stage 1 validation study. University labs with existing NIR or bioimpedance infrastructure are ideal collaborators.</div>
+      </div>
+      <div class="ci-item">
+        <div class="ci-label">Clinical Collaboration</div>
+        <div class="ci-text">We are seeking oncologists, genetic counsellors, and breast surgery teams interested in being involved in the design of the patient-facing components and the validation study patient recruitment pathway.</div>
+      </div>
+      <div class="ci-item">
+        <div class="ci-label">Investment</div>
+        <div class="ci-text">We are seeking seed-stage investment to fund the Stage 1 observational validation study. Target raise: $1M. Investor profile: health technology, biotech, or impact-focused funds with experience in medical device development timelines.</div>
+      </div>
+    </div>
+    <div class="contact-form">
+      <input class="form-input" type="text" placeholder="Your name">
+      <input class="form-input" type="email" placeholder="Your email">
+      <input class="form-input" type="text" placeholder="Organisation / institution">
+      <select class="form-input" style="cursor:pointer;">
+        <option value="" disabled selected>I am interested in...</option>
+        <option>Research partnership</option>
+        <option>Clinical collaboration</option>
+        <option>Investment</option>
+        <option>General enquiry</option>
+      </select>
+      <textarea class="form-input form-textarea" placeholder="Tell us about your interest in LuminaPatch..."></textarea>
+      <button class="form-btn">Send Message</button>
+      <div class="form-note">We respond to all enquiries within 48 hours.</div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div>
+    <div class="footer-brand">Lumina<span>Patch</span></div>
+    <div class="footer-tagline">Continuous monitoring for every woman who can't afford to wait.</div>
+  </div>
+  <div class="footer-links">
+    <a href="#problem">Problem</a>
+    <a href="#solution">Solution</a>
+    <a href="#how">How It Works</a>
+    <a href="#technical">Technical</a>
+    <a href="#roadmap">Roadmap</a>
+    <a href="#faq">FAQ</a>
+    <a href="#about">About</a>
+    <a href="#contact">Contact</a>
+  </div>
+</footer>
+
+</body>
+</html>
